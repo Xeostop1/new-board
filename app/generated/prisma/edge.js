@@ -107,7 +107,7 @@ const config = {
       "value": "prisma-client-js"
     },
     "output": {
-      "value": "C:\\Users\\hns\\Desktop\\board-next\\app\\generated\\prisma",
+      "value": "/Users/hanaseo/Downloads/logo/new-board/app/generated/prisma",
       "fromEnvVar": null
     },
     "config": {
@@ -116,17 +116,16 @@ const config = {
     "binaryTargets": [
       {
         "fromEnvVar": null,
-        "value": "windows",
+        "value": "darwin-arm64",
         "native": true
       }
     ],
     "previewFeatures": [],
-    "sourceFilePath": "C:\\Users\\hns\\Desktop\\board-next\\prisma\\schema.prisma",
+    "sourceFilePath": "/Users/hanaseo/Downloads/logo/new-board/prisma/schema.prisma",
     "isCustomOutput": true
   },
   "relativeEnvPaths": {
-    "rootEnvPath": null,
-    "schemaEnvPath": "../../../.env"
+    "rootEnvPath": null
   },
   "relativePath": "../../../prisma",
   "clientVersion": "6.8.2",

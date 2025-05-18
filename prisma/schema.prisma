@@ -1,15 +1,40 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
-  output   = "../app/generated/prisma"
+  // output = "../app/generated/prisma"  ← 이 줄은 삭제
 }
 
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
+}
+
+/// 사용자 모델
+model User {
+  id        String    @id @default(cuid())
+  email     String    @unique
+  name      String?
+  posts     Post[]    @relation("UserPosts")
+  comments  Comment[] @relation("UserComments")
+}
+
+/// 게시글 모델
+model Post {
+  id        String    @id @default(cuid())
+  title     String
+  content   String
+  author    User      @relation("UserPosts", fields: [authorId], references: [id])
+  authorId  String
+  comments  Comment[] @relation("PostComments")
+  createdAt DateTime  @default(now())
+}
+
+/// 댓글 모델
+model Comment {
+  id        String   @id @default(cuid())
+  content   String
+  post      Post     @relation("PostComments", fields: [postId], references: [id])
+  postId    String
+  author    User     @relation("UserComments", fields: [authorId], references: [id])
+  authorId  String
+  createdAt DateTime @default(now())
 }
