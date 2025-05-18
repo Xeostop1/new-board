@@ -1,6 +1,6 @@
 generator client {
   provider = "prisma-client-js"
-  // output = "../app/generated/prisma"  ← 이 줄은 삭제
+ 
 }
 
 datasource db {
