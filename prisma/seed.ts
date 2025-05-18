@@ -17,6 +17,7 @@ async function main() {
     title: `샘플 포스트 #${i + 1}`,
     content: "이 게시물은 테스트용 더미 데이터입니다.",
     authorId: user.id,
+    likes: Math.floor(Math.random() * 100), // 0~99 랜덤 좋아요
   }));
 
   await prisma.post.createMany({ data: postsData });

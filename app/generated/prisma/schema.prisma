@@ -8,7 +8,6 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-
 /// 사용자 모델
 model User {
   id        String    @id @default(cuid())
@@ -27,7 +26,9 @@ model Post {
   authorId  String
   comments  Comment[] @relation("PostComments")
   createdAt DateTime  @default(now())
+  likes     Int       @default(0) 
 }
+
 
 /// 댓글 모델
 model Comment {
