@@ -8,17 +8,14 @@ export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
   const sort = searchParams.get("sort") || "추천";
 
-  // 정렬 옵션을 타입 안전하게 정의
   const sortOptions = {
     추천: { createdAt: "desc" },
-    팔로잉: { createdAt: "desc" }, // 추후 팔로잉 기능에 맞게 변경
+    팔로잉: { createdAt: "desc" },
     좋아요: { likes: "desc" },
-    저장됨: { createdAt: "desc" }, // 추후 저장됨 기능에 맞게 변경
+    최신순: { createdAt: "desc" },
   } as const;
 
   type SortKey = keyof typeof sortOptions;
-
-  // 타입 안전하게 정렬 조건 가져오기
   const orderBy = sortOptions[sort as SortKey] ?? { createdAt: "desc" };
 
   const posts = await prisma.post.findMany({
@@ -28,4 +25,38 @@ export async function GET(req: Request) {
   });
 
   return NextResponse.json(posts);
+}
+
+// ✅ 글 등록용 POST 추가
+export async function POST(req: Request) {
+  const body = await req.json();
+  const { title, content } = body;
+
+  const user = await prisma.user.findFirst({
+    where: { email: "test@example.com" },
+  });
+
+  if (!user) {
+    return NextResponse.json({ error: "User not found" }, { status: 400 });
+  }
+
+  const newPost = await prisma.post.create({
+    data: {
+      title,
+      content,
+      authorId: user.id,
+    },
+    select: {
+      id: true,
+      title: true,
+      content: true,
+      createdAt: true,
+      likes: true,
+      author: {
+        select: { name: true },
+      },
+    },
+  });
+
+  return NextResponse.json(newPost, { status: 201 });
 }

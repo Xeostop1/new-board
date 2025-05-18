@@ -3,7 +3,7 @@
 
 import { useState } from "react";
 
-const options = ["추천", "팔로잉", "좋아요"];
+const options = ["추천", "팔로잉", "좋아요", "최신순"];
 
 type Props = {
   value: string;
