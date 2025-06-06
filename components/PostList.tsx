@@ -1,50 +1,74 @@
-// app/components/PostList.tsx
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Post } from "@/types/Post";
-import SortDropdown from "./SortDropdown";
+import LikeButton from "./LikeButton";
+import DeleteButton from "./DeleteButton";
+import CommentSection from "@/components/CommentSection";
+// TypeScript에서 useState로 만든 상태를 외부에서 조작할 수 있도록 타입을 정확히 정의한 것
+// React.Dispatch 상태를 업데이트하는 함수 타입
+// React.SetStateAction<Post[]>	setPosts에 전달할 수 있는 값의 타입
 
-export default function PostList() {
-  const [posts, setPosts] = useState<Post[]>([]);
-  const [sort, setSort] = useState("추천");
+type Props = {
+  posts: Post[];
+  setPosts: React.Dispatch<React.SetStateAction<Post[]>>;
+};
 
-  useEffect(() => {
-    fetch(`/api/posts?sort=${sort}`)
-      .then((res) => res.json())
-      .then((data) => setPosts(data));
-  }, [sort]);
+export default function PostList({ posts, setPosts }: Props) {
+  const [commentInputs, setCommentInputs] = useState<{ [postId: string]: string }>({}); // ***
 
-  const handleLike = async (postId: string) => {
-    await fetch(`/api/posts/${postId}/like`, {
-      method: "PUT",
+  const handleCommentChange = (postId: string, value: string) => {
+    setCommentInputs((prev) => ({ ...prev, [postId]: value })); // ***
+  };
+
+  const handleCommentSubmit = async (postId: string) => {
+    const content = commentInputs[postId]?.trim();
+    if (!content) return;
+
+    await fetch(`/api/posts/${postId}/comments`, {
+      method: "POST",
+      body: JSON.stringify({ content }),
+      headers: { "Content-Type": "application/json" },
     });
 
-    // UI에도 바로 반영
-    setPosts((prev) => prev.map((p) => (p.id === postId ? { ...p, likes: p.likes + 1 } : p)));
+    // 댓글 등록 후 입력값 초기화
+    setCommentInputs((prev) => ({ ...prev, [postId]: "" })); // ***
   };
 
   return (
     <div className="space-y-4">
-      <div className="mb-4">
-        <SortDropdown value={sort} onChange={setSort} />
-      </div>
       {posts.map((post) => (
         <div key={post.id} className="border p-4 rounded bg-white">
           <h2 className="text-lg font-bold">{post.title}</h2>
           <p>{post.content}</p>
-          <p>{post.likes}</p>
-          <p>{post.id}</p>
+          <p className="text-sm text-gray-500">❤️ {post.likes ?? 0} 좋아요</p>
 
           <div className="mt-2 flex items-center justify-between">
-            <p className="text-sm text-gray-500">❤️ {post.likes} 좋아요</p>
-            <button
-              onClick={() => handleLike(post.id)}
-              className="text-sm px-3 py-1 rounded bg-red-100 hover:bg-red-200"
-            >
-              ❤️ 좋아요
-            </button>
+            <p className="text-xs text-gray-400">ID: {post.id}</p>
+            <LikeButton
+              postId={post.id}
+              initialLikes={post.likes}
+              onToggle={(delta) => {
+                setPosts((prev) =>
+                  prev.map((p) => (p.id === post.id ? { ...p, likes: p.likes + delta } : p))
+                );
+              }}
+            />
+            <DeleteButton
+              targetId={post.id}
+              apiPath="/api/posts"
+              onDeleted={() => {
+                setPosts((prev) => prev.filter((p) => p.id !== post.id));
+              }}
+            />
           </div>
+
+          <CommentSection
+            postId={post.id}
+            value={commentInputs[post.id] || ""} // ***
+            onChange={(val) => handleCommentChange(post.id, val)} // ***
+            onSubmit={() => handleCommentSubmit(post.id)} // ***
+          />
         </div>
       ))}
     </div>

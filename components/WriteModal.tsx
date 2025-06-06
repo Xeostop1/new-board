@@ -1,24 +1,35 @@
 "use client";
 
 import { useState } from "react";
+import { Post } from "@/types/Post";
 
 type Props = {
   onClose: () => void;
-  onSuccess: () => void;
+  onSuccess: (newPost: Post) => void;
 };
 
 export default function WriteModal({ onClose, onSuccess }: Props) {
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
+  const [error, setError] = useState("");
 
   const handleSubmit = async () => {
-    await fetch("/api/posts", {
+    if (!title.trim() || !content.trim()) {
+      setError("제목과 내용을 모두 입력해주세요.");
+      return;
+    }
+
+    const res = await fetch("/api/posts", {
       method: "POST",
       body: JSON.stringify({ title, content }),
       headers: { "Content-Type": "application/json" },
     });
 
-    onSuccess();
+    const newPost = await res.json();
+
+    onSuccess(newPost);
+    setTitle("");
+    setContent("");
     onClose();
   };
 
@@ -35,10 +46,11 @@ export default function WriteModal({ onClose, onSuccess }: Props) {
         />
         <textarea
           placeholder="내용을 입력하세요"
-          className="w-full border p-2 rounded mb-4 h-32"
+          className="w-full border p-2 rounded mb-2 h-32"
           value={content}
           onChange={(e) => setContent(e.target.value)}
         />
+        {error && <p className="text-sm text-red-500 mb-2">{error}</p>}
         <div className="flex justify-end gap-2">
           <button onClick={onClose} className="text-gray-500">
             취소
