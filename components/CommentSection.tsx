@@ -40,6 +40,12 @@ export default function CommentSection({ postId }: Props) {
       <input
         value={input}
         onChange={(e) => setInput(e.target.value)}
+        onKeyDown={(e) => {
+          if (e.key === "Enter") {
+            e.preventDefault();
+            handleSubmit();
+          }
+        }}
         placeholder="댓글을 입력하세요"
         className="w-full border rounded p-2 mb-2"
       />
